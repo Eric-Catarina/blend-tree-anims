@@ -15,7 +15,6 @@ public class PlayerInput : MonoBehaviour
     public float deceleration = 2f;
     
     private float currentSpeed = 0f;
-    private bool isStanding = false;
 
     void Start()
     {
@@ -24,11 +23,19 @@ public class PlayerInput : MonoBehaviour
         {
             Debug.LogError("Animator component not found on this GameObject");
         }
+        
+        // Garante que comece com a animação standing desativada
+        animator.SetBool(standParam, false);
     }
 
     void Update()
     {
-        HandleMovementInput();
+        // Só processa movimento se não estiver em standing
+        if (!animator.GetBool(standParam))
+        {
+            HandleMovementInput();
+        }
+        
         HandleStandInput();
         
         // Atualiza o parâmetro de velocidade no Animator
@@ -37,8 +44,6 @@ public class PlayerInput : MonoBehaviour
 
     private void HandleMovementInput()
     {
-        if (isStanding) return; // Não permite movimento enquanto está em FemaleStanding
-
         // Teclas para movimento
         if (Input.GetKey(KeyCode.W))
         {
@@ -62,14 +67,14 @@ public class PlayerInput : MonoBehaviour
 
     private void HandleStandInput()
     {
-        // Tecla para ativar a animação FemaleStanding (usa Layer Mask)
+        // Tecla para alternar a animação FemaleStanding
         if (Input.GetKeyDown(KeyCode.E))
         {
-            isStanding = !isStanding;
-            animator.SetBool(standParam, isStanding);
+            bool currentlyStanding = animator.GetBool(standParam);
+            animator.SetBool(standParam, !currentlyStanding);
             
             // Se entrou no modo standing, reseta a velocidade
-            if (isStanding)
+            if (!currentlyStanding)
             {
                 currentSpeed = 0f;
             }
